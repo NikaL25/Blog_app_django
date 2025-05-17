@@ -1,119 +1,104 @@
-Blog-App
-Blog-App is a RESTful API built with Django 5.1 and Django REST Framework, designed for creating and managing blogs, comments, and notifications. It supports user authentication via JSON Web Tokens (JWT) and provides a Swagger UI for API documentation and testing.
-Features
+# 📘 Blog-App
 
-Blog Management: Create, read, update, and delete (CRUD) blogs with titles, descriptions, and optional photos.
-Comments: Add and manage comments on blogs, with support for nested replies.
-Notifications: Receive notifications for likes and comments on your blogs.
-Authentication: Secure JWT-based authentication using access and refresh tokens.
-Filtering & Ordering: Filter blogs by author or title and order by creation date or like count.
-Swagger UI: Interactive API documentation for testing endpoints.
+Blog-App is a RESTful API built with Django 5.1 and Django REST Framework, designed for creating and managing blogs, comments, and notifications. It supports JWT-based authentication and includes Swagger UI for interactive API documentation and testing.
 
-Prerequisites
+## 🚀 Features
 
-Python 3.13+
-Virtualenv
-SQLite (default database)
+- Blog Management – Create, read, update, and delete blog posts with titles, descriptions, and optional photos.  
+- Comments – Add and manage comments on blogs, with support for nested replies.  
+- Notifications – Receive alerts when users comment on or like your blog posts.  
+- Authentication – Secure login using JWT (access and refresh tokens).  
+- Filtering & Ordering – Filter blogs by author or title, and sort by date or number of likes.  
+- Swagger UI – Built-in interactive API documentation for easy testing.
 
-Installation
+## 📋 Prerequisites
 
-Clone the repository:
-git clone <repository-url>
+- Python 3.13+  
+- virtualenv  
+- SQLite (default database)
+
+## ⚙️ Installation
+
+Clone the repository:  
+git clone https://github.com/NikaL25/Blog_app_django.git  
 cd blog-app
 
+Create and activate a virtual environment:  
+python -m venv venv  
+source venv/bin/activate        # macOS/Linux  
+.\venv\Scripts\activate         # Windows
 
-Set up a virtual environment:
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-
-
-Install dependencies:
+Install dependencies:  
 pip install -r requirements.txt
 
-
-Set up environment variables:Create a .env file in the project root:
-SECRET_KEY=your-secret-key
-ACCESS_TOKEN_LIFETIME=5
+Configure environment variables by creating a `.env` file in the project root:  
+SECRET_KEY=your-secret-key  
+ACCESS_TOKEN_LIFETIME=5  
 REFRESH_TOKEN_LIFETIME=1440
 
-
-Apply migrations:
+Apply database migrations:  
 python manage.py migrate
 
-
-Create a test user:
-python manage.py shell
-
-from django.contrib.auth.models import User
-user = User.objects.create_user(username='testuser', password='testpass123', email='test@example.com')
-user.is_active = True
+Create a test user (optional):  
+python manage.py shell  
+from django.contrib.auth.models import User  
+user = User.objects.create_user(username='testuser', password='testpass123', email='test@example.com')  
+user.is_active = True  
 user.save()
 
+## ▶️ Running the App
 
+Start the development server:  
+python manage.py runserver
 
-Running the Application
+Visit the API root at http://127.0.0.1:8000/  
+Visit the Swagger UI at http://127.0.0.1:8000/swagger/
 
-Start the development server:python manage.py runserver
+## 🧪 API Testing with Swagger
 
+Open Swagger UI at http://127.0.0.1:8000/swagger/  
 
-Access the API at http://127.0.0.1:8000 and Swagger UI at http://127.0.0.1:8000/swagger/.
-
-Testing the REST API with Swagger UI
-
-Open Swagger UI:Navigate to http://127.0.0.1:8000/swagger/.
-
-Obtain a JWT Token:
-
-Go to POST /api/token/.
-Click Try it out.
-Enter:{
-  "username": "testuser",
-  "password": "testpass123"
+Use POST /api/token/ with the following JSON to obtain a JWT token:  
+{  
+  "username": "testuser",  
+  "password": "testpass123"  
 }
 
+Click “Authorize” in Swagger and enter:  
+Bearer <your_access_token>
 
-Click Execute and copy the access token from the response.
+Test the endpoints:  
 
-
-Authenticate:
-
-Click Authorize in Swagger UI.
-Enter Bearer <your_access_token> (e.g., Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...).
-Click Authorize.
-
-
-Test Endpoints:
-
-Create a Blog: Use POST /api/blogs/ with:{
-  "title": "My Blog",
-  "description": "A test blog."
+Create blog: POST /api/blogs/  
+{  
+  "title": "My Blog",  
+  "description": "A test blog."  
 }
 
+List blogs: GET /api/blogs/?title=Test&ordering=-like_count
 
-List Blogs: Use GET /api/blogs/ with filters like ?title=My or ?ordering=-like_count.
-Add Comment: Use POST /api/comments/ with:{
-  "blog_id": 1,
-  "text": "Great blog!"
+Add comment: POST /api/comments/  
+{  
+  "blog_id": 1,  
+  "text": "Nice blog!"  
 }
 
+View notifications: GET /api/notifications/
 
-View Notifications: Use GET /api/notifications/.
-
-
-Refresh Token:If the access token expires (default: 5 minutes), use POST /api/token/refresh/ with:
-{
-  "refresh": "<your_refresh_token>"
+Refresh token: POST /api/token/refresh/  
+{  
+  "refresh": "<your_refresh_token>"  
 }
 
+## 💻 Example curl Commands
 
+Get JWT token:  
+curl -X POST http://127.0.0.1:8000/api/token/ \  
+     -H "Content-Type: application/json" \  
+     -d '{"username": "testuser", "password": "testpass123"}'
 
-Example curl Commands
-
-Get Token:curl -X POST http://127.0.0.1:8000/api/token/ -H 'Content-Type: application/json' -d '{"username": "testuser", "password": "testpass123"}'
-
-
-Create Blog:curl -X POST http://127.0.0.1:8000/api/blogs/ -H 'Content-Type: application/json' -H 'Authorization: Bearer <access_token>' -d '{"title": "Test", "description": "Blog"}'
-
-
-
-
+Create a blog post:  
+curl -X POST http://127.0.0.1:8000/api/blogs/ \  
+     -H "Content-Type: application/json" \  
+     -H "Authorization: Bearer <access_token>" \  
+     -d '{"title": "Test Blog", "description": "My first blog"}'
