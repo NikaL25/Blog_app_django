@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}{{ blog.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">{{ blog.title }}</h2>
+                <p>{{ blog.description }}</p>
+
+                {% if blog.photo %}
+                    <img src="{{ blog.photo.url }}" class="img-fluid mb-3" width="300" alt="Фото блога">
+                {% endif %}
+
+                <p>
+                    <small class="text-muted">
+                        Author: {{ blog.author.username }} | {{ blog.created_at }}
+                    </small>
+                </p>
+
+                <p>Likes: {{ blog.like_count }}</p>
+
+                {% if user.is_authenticated and user != blog.author %}
+                    <a href="{% url 'blogs:like_blog' blog.pk %}" class="btn btn-primary btn-sm">
+                        {% if user in blog.likes.all %}Remove like{% else %}Like{% endif %}
+                    </a>
+                {% endif %}
+
+                {% if user == blog.author %}
+                    <a href="{% url 'blogs:update_blog' blog.pk %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'blogs:delete_blog' blog.pk %}" class="btn btn-danger">Delete</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <h3 class="mt-4">Comments</h3>
+
+        {% for comment in comment_page_obj %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <p>{{ comment.text }}</p>
+                    <p>
+                        <small class="text-muted">
+                            Author: {{ comment.author.username }} | {{ comment.created_at }}
+                        </small>
+                    </p>
+
+                    {% if user == comment.author %}
+                        <a href="{% url 'blogs:update_comment' comment.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'blogs:delete_comment' comment.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    {% elif user.is_superuser %}
+                        <a href="{% url 'blogs:delete_comment' comment.pk %}" class="btn btn-danger btn-sm">Delete (admin)</a>
+                    {% endif %}
+
+                    {% for reply in comment.replies.all %}
+                        <div class="card mb-2 ms-4">
+                            <div class="card-body">
+                                <p>{{ reply.text }}</p>
+                                <p>
+                                    <small class="text-muted">
+                                        Author: {{ reply.author.username }} | {{ reply.created_at }}
+                                    </small>
+                                </p>
+
+                                {% if user == reply.author %}
+                                    <a href="{% url 'blogs:update_comment' reply.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{% url 'blogs:delete_comment' reply.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                {% elif user.is_superuser %}
+                                    <a href="{% url 'blogs:delete_comment' reply.pk %}" class="btn btn-danger btn-sm">Delete (admin)</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-outline-secondary btn-sm toggle-reply" data-comment-id="{{ comment.id }}">Reply</button>
+                        <div id="reply-form-{{ comment.id }}" class="reply-form mt-2" style="display: none;">
+                            <form method="post" action="{% url 'blogs:add_reply' blog.pk comment.id %}">
+                                {% csrf_token %}
+                                {{ comment_form.as_p }}
+                                <button type="submit" class="btn btn-secondary btn-sm">Send</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p>There are no comments yet.</p>
+        {% endfor %}
+
+        {% if comment_page_obj.has_other_pages %}
+            <nav aria-label="Comment navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if comment_page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?comment_page={{ comment_page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                    {% endif %}
+
+                    {% for num in comment_page_obj.paginator.page_range %}
+                        <li class="page-item {% if comment_page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?comment_page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if comment_page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?comment_page={{ comment_page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            <h4 class="mt-4">Add a comment</h4>
+            <form method="post" action="{% url 'blogs:add_comment' blog.pk %}">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button type="submit" class="btn btn-primary">Comment</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const replyButtons = document.querySelectorAll('.toggle-reply');
+        replyButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const replyForm = document.getElementById('reply-form-' + commentId);
+                replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Profile: {{ user.username }}</h2>
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" class="avatar img-fluid rounded-circle mb-3" width="0" alt="Аватар">
+                {% endif %}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+                </form>
+                <a href="{% url 'accounts:delete_profile' %}" class="btn btn-danger w-100 mt-2">Delete Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

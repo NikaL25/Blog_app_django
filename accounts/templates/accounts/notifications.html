@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Notifications</h2>
+        {% for notification in notifications %}
+            <div class="card mb-2 {% if not notification.is_read %}bg-light{% endif %}">
+                <div class="card-body">
+                    <p>{{ notification.actor.username }} {{ notification.verb }} your post "{{ notification.target_type }}"</p>
+                    <p><small class="text-muted">{{ notification.created_at }}</small></p>
+
+                    <form method="post" action="{% url 'accounts:delete_notification' notification.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p>No notifications.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
