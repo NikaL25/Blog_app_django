@@ -21,6 +21,7 @@ Blog-App is a RESTful API built with Django 5.1 and Django REST Framework, desig
 
 Clone the repository:  
 git clone https://github.com/NikaL25/Blog_app_django.git
+
 cd Blog_app_django
 
 Create and activate a virtual environment:  
